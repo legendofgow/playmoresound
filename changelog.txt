@@ -1,0 +1,54 @@
+Changes with * at the start are the ones that are currently under development, the rest is already added.
+
+Sound playing changes:
+- Add radius -3: Plays sound to all players in the world, but not globally.
+- Sounds will avoid checking for players spectator game mode and invisibility effect if the radius is already set to 0, improving performance.
+- PlaySoundEvent was reworked so it isn't called for every listener, this considerably improves sound playing performance.
+- PlaySoundEvent and PlayRichSoundEvent classes were moved to the same package as Playable sounds, this allows the sounds to get the event's location without calling Location#clone, saving performance.
+
+Regions:
+*- Add "/pms region set sounds" command to allow players to add sounds to their own regions in-game through a GUI.
+- Complete overhaul region commands to fix issues and do minor optimizations.
+- Fix error if there is a console-made region present, and you try to create a region without the permission 'playmoresounds.region.create.unlimited.regions'.
+- Fix error if you try to get info of a region from a player that was purged from the server's files.
+- Made so "/pms region list" accepts offline players as arguments if you're on PaperMC, and "CONSOLE" to list console-made regions.
+- Remove "description" as an alias for "info" region command to avoid confusion with "/pms rg set description".
+- Rework how region sounds are played (again):
+  - Last update, region sounds were reworked to be cached, so they don't have to be got from config as the player was entering/leaving regions.
+  Now, regions themselves will hold the sound. This is another performance improvement because when entering/leaving regions, the plugin won't
+  have to look in cache for a region sound, because the region object itself holds the sound that should be played.
+  - As a consequence, regions.yml file was removed, due to both this new way of storing sounds, and how you can edit region sounds through a GUI.
+- Every time some region property is changed, the plugin will wait 10 minutes before saving to the region file. This makes so regions are saved asynchronously all at once.
+- Fix Prevent Default Sound on Loop section of regions preventing the Enter section sound, rather than the actual default enter sound.
+- Fix loop sound stopping in case the region was renamed.
+- Fix default region enter sound not being stopped.
+
+World Time Triggers:
+- Fix issues that would make so the times would play to any world, ignoring the world main sections.
+- Made so world time triggers uses just one repeating task rather than one for every config world.
+
+WorldGuard/RedProtect/Regions Handler addons:
+- Due to the immense amount of variables a player can have for entering and leaving regions, these addons will now only convert the WorldGuard/RedProtect regions to PlayMoreSounds regions.
+- Since WorldGuard does not have a native region enter/leave event, I had to code them in by myself. WorldGuard Regions addon used to check each time a player moved if they were inside regions,
+ then it would call Regions Handler addon to handle enter/leave/loop sounds. This lead to a few bugs and duplication of code that was already in base PlayMoreSounds, and because I had to use
+ WorldGuard API and didn't have control of the code, I couldn't optimize completely how the events were handled. Plus, I had to add compatibility with every other addon that listened for region
+ leave events, like NBS Song Player. So now, WorldGuard regions that you specify through a command will create a PlayMoreSounds region in the same location, allowing for the great optimization
+ of PlayMoreSounds regions, the same way of listening when players are inside/outside regions (for "Wait ResourcePack load before playing sound on login"), and integration of other addons that
+ want to play region sounds. The same applies for RedProtect addon (This one had the issue of not handling player login/logout, also RedProtect is really heavy on performance compared to PlayMoreSounds regions).
+ - If you're still concerned about performance of PMS regions, tests show even when region isInside method is called 1000 times a tick, the performance is unnoticeable. (For real world performance, this is the same as the method being called for 1000 players in the server walking 20 blocks a second.)
+
+Sound Editing GUI:
+- You can now edit sounds using a GUI!
+- Use the command /pms edit to navigate through sounds.yml sounds and edit them.
+- Inputs will be given through a fancy Anvil inventory.
+*- In a region you can use the command /pms rg set sound to set a sound to play in this region, for loop, enter or leave.
+
+Other Changes:
+- Player Ban will now be checked on PlayerKickEvent, rather than PlayerQuitEvent. Avoiding use of Player#isBanned everytime a player leaves the server, removing the lag.
+- Swap Hands will no longer play if the swapped items are the same.
+- last_damage and killer_uuid namespaced keys will be removed on PlayerDeathEvent, rather than PlayerRespawnEvent. This makes so the keys are removed more consistently, where before they could be saved on player NBT data forever.
+
+Fixes:
+- Fix log sounds dev option giving an error when the entity making a sound is null.
+- Fix addons inventory not being able to be open after an error.
+- Fix addons inventory giving key not found when informing the user that the latest addons are unsupported, and the addons made for the current PlayMoreSounds version will be downloaded.
