@@ -24,7 +24,7 @@ import com.epicnicity322.playmoresounds.bukkit.listeners.OnPlayerResourcePackSta
 import com.epicnicity322.playmoresounds.bukkit.sound.PlayableRichSound;
 import com.epicnicity322.playmoresounds.bukkit.sound.PlayableSound;
 import com.epicnicity322.playmoresounds.bukkit.sound.SoundManager;
-import com.epicnicity322.playmoresounds.bukkit.sound.events.PlayRichSoundEvent;
+import com.epicnicity322.playmoresounds.bukkit.sound.PlayRichSoundEvent;
 import com.epicnicity322.playmoresounds.core.config.Configurations;
 import com.epicnicity322.yamlhandler.Configuration;
 import com.epicnicity322.yamlhandler.ConfigurationSection;
@@ -267,7 +267,7 @@ public class RegionsHandler {
 
         @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
         public void onPlayRichSound(PlayRichSoundEvent event) {
-            Player player = event.getPlayer();
+            Player player = event.getSourcePlayer();
             if (player == null) return;
             HashSet<PlayableRichSound> soundsToPrevent = toPrevent.get(player.getUniqueId());
             if (soundsToPrevent == null) return;

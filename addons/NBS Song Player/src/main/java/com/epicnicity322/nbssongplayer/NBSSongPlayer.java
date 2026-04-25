@@ -24,7 +24,7 @@ import com.epicnicity322.playmoresounds.bukkit.command.CommandLoader;
 import com.epicnicity322.playmoresounds.bukkit.command.subcommands.ReloadSubCommand;
 import com.epicnicity322.playmoresounds.bukkit.region.SoundRegion;
 import com.epicnicity322.playmoresounds.bukkit.region.events.RegionLeaveEvent;
-import com.epicnicity322.playmoresounds.bukkit.sound.events.PlaySoundEvent;
+import com.epicnicity322.playmoresounds.bukkit.sound.PlaySoundEvent;
 import com.epicnicity322.playmoresounds.core.PlayMoreSoundsCore;
 import com.epicnicity322.playmoresounds.core.addons.PMSAddon;
 import com.epicnicity322.playmoresounds.core.config.Configurations;
@@ -179,7 +179,8 @@ public final class NBSSongPlayer extends PMSAddon implements Listener {
         String sound = event.getSound().getSound();
 
         if (sound.toLowerCase().startsWith("nbs:")) {
-            Player player = event.getPlayer();
+            Player player = event.getSourcePlayer();
+            if (player == null) return;
             ConfigurationSection childSection = event.getSound().getSection();
 
             event.setCancelled(true);
