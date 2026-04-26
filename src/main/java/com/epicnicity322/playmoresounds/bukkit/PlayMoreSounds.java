@@ -65,7 +65,7 @@ public final class PlayMoreSounds extends JavaPlugin {
     private static final @NotNull LoadableHashSet<String> serverPlugins = new LoadableHashSet<>();
     private static final @NotNull AddonManager addonManager = new AddonManager(serverPlugins, logger);
     private static @Nullable HashSet<Runnable> onDisable;
-    private static @Nullable HashSet<Runnable> onEnable;
+    private static @Nullable HashSet<Runnable> onEnableRunnables;
     private static @Nullable HashSet<Runnable> onInstance;
     private static @Nullable HashSet<Runnable> onReload;
     private static @Nullable PlayMoreSounds instance;
@@ -106,13 +106,6 @@ public final class PlayMoreSounds extends JavaPlugin {
         }
     }
 
-    /**
-     * Adds a runnable to run when the plugin is disabled. If the plugin was already disabled, then the runnable is run
-     * immediately.
-     * If a exception is caught, PlayMoreSounds automatically handles it and logs into the data folder.
-     *
-     * @param runnable Runnable to run on disable.
-     */
     public static void onDisable(@NotNull Runnable runnable) {
         if (disabled) {
             try {
@@ -126,33 +119,19 @@ public final class PlayMoreSounds extends JavaPlugin {
         }
     }
 
-    /**
-     * Adds a runnable to run when the plugin is enabled. If the plugin was already enabled, then the runnable is run
-     * immediately.
-     * If a exception is caught, PlayMoreSounds automatically handles it and logs into the data folder.
-     *
-     * @param runnable Runnable to run on enable.
-     */
-    public static void onEnable(@NotNull Runnable runnable) {
+    public static void addOnEnableRunnable(@NotNull Runnable runnable) {
         if (enabled) {
             try {
                 runnable.run();
             } catch (Throwable t) {
-                PlayMoreSoundsCore.getErrorHandler().report(t, "Plugin already enabled so instantly execute #onEnable:");
+                PlayMoreSoundsCore.getErrorHandler().report(t, "Plugin already enabled so instantly execute #addOnEnableRunnable:");
             }
         } else {
-            if (onEnable == null) onEnable = new HashSet<>();
-            onEnable.add(runnable);
+            if (onEnableRunnables == null) onEnableRunnables = new HashSet<>();
+            onEnableRunnables.add(runnable);
         }
     }
 
-    /**
-     * Adds a runnable to run when the plugin is loaded. If the plugin was already loaded, then the runnable is run
-     * immediately.
-     * If a exception is caught, PlayMoreSounds automatically handles it and logs into the data folder.
-     *
-     * @param runnable Runnable to run on load.
-     */
     public static void onInstance(@NotNull Runnable runnable) {
         if (getInstance() != null) {
             try {
@@ -166,46 +145,23 @@ public final class PlayMoreSounds extends JavaPlugin {
         }
     }
 
-    /**
-     * Adds a runnable to run when the configurations are reloaded.
-     * If a exception is caught, PlayMoreSounds automatically handles it and logs into the data folder.
-     *
-     * @param runnable Runnable to run on configurations reload.
-     */
     public static void onReload(@NotNull Runnable runnable) {
         if (onReload == null) onReload = new HashSet<>();
         onReload.add(runnable);
     }
 
-    /**
-     * The instance of PlayMoreSounds' main class, although this is not the best approach, I decided to leave it like
-     * that for easy use of the API, like playing sounds on {@link PlayableSound}
-     *
-     * @return The instance of PlayMoreSounds JavaPlugin class, or null if the plugin wasn't loaded yet.
-     */
     public static @Nullable PlayMoreSounds getInstance() {
         return instance;
     }
 
-    /**
-     * @return The logger with PlayMoreSounds' prefix.
-     */
     public static @NotNull Logger getConsoleLogger() {
         return logger;
     }
 
-    /**
-     * @return PlayMoreSounds' {@link MessageSender} containing every message from language files.
-     */
     public static @NotNull MessageSender getLanguage() {
         return language;
     }
 
-    /**
-     * Gets the addon manager for this platform.
-     *
-     * @return The addon manager.
-     */
     public static @NotNull AddonManager getAddonManager() {
         return addonManager;
     }
@@ -246,7 +202,6 @@ public final class PlayMoreSounds extends JavaPlugin {
         boolean success = false;
 
         try {
-            // Loading and registering addons:
             for (var plugin : Bukkit.getPluginManager().getPlugins()) {
                 serverPlugins.add(plugin.getName());
             }
@@ -256,7 +211,6 @@ public final class PlayMoreSounds extends JavaPlugin {
             try {
                 addonManager.registerAddons();
             } catch (UnsupportedOperationException ignored) {
-                // Only thrown if addons were registered before, which is irrelevant.
             } catch (IOException ex) {
                 logger.log("&cFailed to register addons.");
                 errorHandler.report(ex, "Addon registration error:");
@@ -279,21 +233,14 @@ public final class PlayMoreSounds extends JavaPlugin {
 
             addonManager.startAddons(StartTime.BEFORE_LISTENERS);
 
-            // Registering all listeners:
             var pm = Bukkit.getPluginManager();
 
             OnPlayerResourcePackStatus.load(this);
-            // Registering region wand tool listener.
             pm.registerEvents(new OnPlayerInteract(), this);
-            // Registering region enter event caller.
             pm.registerEvents(new OnPlayerJoin(), this);
-            // Registering region enter and leave event caller.
             pm.registerEvents(new OnPlayerMove(), this);
-            // Registering region leave event caller.
             pm.registerEvents(new OnPlayerQuit(), this);
-            // Registering region enter and leave event caller.
             pm.registerEvents(new OnPlayerTeleport(this), this);
-            // TimeTrigger checks itself it does need to load or not on load method.
             WorldTimeListener.load(this);
 
             logger.log("&6-> &e" + ListenerRegister.loadListeners() + " listeners loaded.");
@@ -365,7 +312,6 @@ public final class PlayMoreSounds extends JavaPlugin {
 
                 addonManager.startAddons(StartTime.END);
 
-                // Bukkit only runs a task once the server has fully loaded.
                 Bukkit.getScheduler().runTask(this, () -> addonManager.startAddons(StartTime.SERVER_LOAD_COMPLETE));
             } else {
                 logger.log("&6============================================", ConsoleLogger.Level.ERROR);
@@ -376,8 +322,8 @@ public final class PlayMoreSounds extends JavaPlugin {
                 Bukkit.getPluginManager().disablePlugin(this);
             }
 
-            if (onEnable != null) {
-                for (Runnable runnable : onEnable) {
+            if (onEnableRunnables != null) {
+                for (Runnable runnable : onEnableRunnables) {
                     try {
                         runnable.run();
                     } catch (Exception e) {
@@ -393,7 +339,6 @@ public final class PlayMoreSounds extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Checking if PlayMoreSounds was already disabled.
         if (disabled) return;
 
         RegionManager.saveAndUpdate();

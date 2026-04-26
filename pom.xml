@@ -57,15 +57,12 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>com.epicnicity322.playmoresounds.core.Main</mainClass>
-                        </manifest>
-                    </archive>
+                    <source>21</source>
+                    <target>21</target>
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
             <plugin>

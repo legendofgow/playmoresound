@@ -44,7 +44,7 @@ public final class ListSubCommand extends Command implements Helpable {
         Runnable updater = () -> chatSoundPages = PMSHelper.splitIntoPages(SoundType.getPresentSoundNames(), Configurations.CONFIG.getConfigurationHolder().getConfiguration().getNumber("List.Chat.Max Per Page").orElse(10).intValue());
 
         updater.run();
-        PlayMoreSounds.onEnable(updater);
+        PlayMoreSounds.addOnEnableRunnable(updater);
         PlayMoreSounds.onReload(updater);
     }
 

@@ -69,7 +69,7 @@ public class RichSoundInventory implements PMSInventory {
             if (soundMaterials.isEmpty()) soundMaterials.add(Material.STONE);
         };
         materialsUpdater.run();
-        PlayMoreSounds.onEnable(materialsUpdater);
+        PlayMoreSounds.addOnEnableRunnable(materialsUpdater);
         PlayMoreSounds.onReload(materialsUpdater);
     }
 

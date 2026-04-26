@@ -64,7 +64,7 @@ public final class EditorInventory implements PMSInventory {
             pages.putAll(PMSHelper.splitIntoPages(inventories, 45));
         };
         pagesUpdater.run();
-        PlayMoreSounds.onEnable(pagesUpdater);
+        PlayMoreSounds.addOnEnableRunnable(pagesUpdater);
         PlayMoreSounds.onReload(pagesUpdater);
     }
 

@@ -41,7 +41,7 @@ public final class OnPlayerTeleport implements Listener {
         };
 
         PlayMoreSounds.onInstance(soundUpdater);
-        PlayMoreSounds.onEnable(soundUpdater); // Make sure to load once all configurations have been reloaded.
+        PlayMoreSounds.addOnEnableRunnable(soundUpdater); // Make sure to load once all configurations have been reloaded.
         PlayMoreSounds.onReload(soundUpdater);
     }
 
