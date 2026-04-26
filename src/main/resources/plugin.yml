@@ -1,12 +1,12 @@
 api-version: '1.21'
 paperweight-mappings-namespace: mojang
-author: Epicnicity322
+author: legendofgow
 depend: [ EpicPluginLib ]
-description: Plays sounds at player events.
+description: Fork of PlayMoreSounds by Epicnicity322, updated for Paper 1.21.1 and Java 21.
 main: com.epicnicity322.playmoresounds.bukkit.PlayMoreSounds
 name: PlayMoreSounds
 version: '${project.version}'
-website: https://www.spigotmc.org/resources/37429/
+website: https://github.com/legendofgow/playmoresound
 
 commands:
   playmoresounds:
